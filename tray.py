@@ -5,8 +5,20 @@ import time
 import urllib.request
 import webbrowser
 
+import tempfile
+
 import pystray
 from PIL import Image, ImageDraw
+
+
+class _Icon(pystray.Icon):
+    """pystray saves temp icons without a .png extension; AppIndicator
+    won't load them. Override to add the suffix."""
+    def _update_fs_icon(self):
+        self._icon_path = tempfile.mktemp(suffix='.png')
+        with open(self._icon_path, 'wb') as f:
+            self.icon.save(f, 'PNG')
+        self._icon_valid = True
 
 STATUS_URL = "https://status.claude.com/api/v2/status.json"
 STATUS_PAGE = "https://status.claude.com"
@@ -72,7 +84,7 @@ def main() -> None:
         pystray.MenuItem("Open status page", lambda icon, item: webbrowser.open(STATUS_PAGE)),
         pystray.MenuItem("Quit", lambda icon, item: icon.stop()),
     )
-    icon = pystray.Icon("claude-status", make_image(ERROR_COLOR), "Loading...", menu)
+    icon = _Icon("claude-status", make_image(ERROR_COLOR), "Loading...", menu)
     threading.Thread(target=_poll, args=(icon,), daemon=True).start()
     icon.run()
 
