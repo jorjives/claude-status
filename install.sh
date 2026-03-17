@@ -40,12 +40,13 @@ fi
 
 # GNOME check
 if command -v gnome-shell &>/dev/null; then
-    if ! gnome-extensions list 2>/dev/null | grep -qiE "appindicatorsupport|ubuntu-appindicators"; then
+    if ! gnome-extensions list 2>/dev/null | grep -qF "appindicatorsupport@rgcjonas.gmail.com"; then
         echo ""
-        echo "NOTE: GNOME detected. To show the tray icon, install the AppIndicator extension:"
+        echo "NOTE: GNOME AppIndicator extension not found (appindicatorsupport@rgcjonas.gmail.com)."
+        echo "The tray icon won't appear without it. Install it:"
         echo "  sudo apt install gnome-shell-extension-appindicator"
-        echo "  or visit: https://extensions.gnome.org/extension/615/appindicator-support/"
-        echo "  Then log out and back in, and enable the extension."
+        echo "  or: https://extensions.gnome.org/extension/615/appindicator-support/"
+        echo "Then log out and back in, and enable it with: gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com"
     fi
 fi
 
