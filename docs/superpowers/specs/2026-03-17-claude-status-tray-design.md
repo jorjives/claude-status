@@ -42,7 +42,7 @@ Indicator values and their colors:
 
 64×64 PIL image:
 - Filled circle in status color (no border)
-- White Anthropic "A" drawn with PIL polygon primitives — upward-pointing triangle with a horizontal crossbar cutout
+- White Anthropic "A": draw a white filled upward-pointing triangle, then draw a white-filled rectangle over it to simulate the crossbar. A simplified approximation is acceptable — exact proportions are unimportant at tray scale (~22×22 px after system scaling)
 - No external font or image files required
 
 ## Polling
@@ -51,7 +51,7 @@ Indicator values and their colors:
 - First fetch on startup (no initial delay)
 - On error (network failure, non-200 response, parse error): icon turns red, tooltip shows "Status unavailable"
 - No backoff — retries on the next 60-second tick
-- Thread-safe: background thread writes to a shared variable; main thread reads it to redraw
+- Thread-safe: a bare global is sufficient (the GIL provides adequate safety for a single variable assignment). The background thread calls `icon.icon = new_image` and `icon.title = new_tooltip` directly — pystray's property assignments are thread-safe
 
 ## Interaction
 
@@ -64,13 +64,15 @@ Indicator values and their colors:
 
 Systemd user service at `~/.config/systemd/user/claude-status.service`:
 - `Restart=on-failure`
-- Runs `python3 /path/to/tray.py`
+- `After=graphical-session.target` / `WantedBy=graphical-session.target`
+- `ExecStart` path written by `install.sh` at install time (absolute path)
 
 `install.sh`:
 1. `pip install --user -r requirements.txt`
-2. Copies `claude-status.service` to `~/.config/systemd/user/`
+2. Generates `~/.config/systemd/user/claude-status.service` with `ExecStart` set to the absolute path of `tray.py` (resolved via `$(realpath "$SCRIPT_DIR/tray.py")` where `SCRIPT_DIR` is the directory containing `install.sh`)
 3. `systemctl --user enable --now claude-status`
+4. If the service is already running, restarts it
 
 ## GNOME/Wayland Note
 
-On GNOME/Wayland, the **AppIndicator and KStatusNotifierItem Support** GNOME Shell extension is required for tray icons to appear. The install script will print a reminder if GNOME is detected and the extension is not installed.
+On GNOME/Wayland, the **AppIndicator and KStatusNotifierItem Support** GNOME Shell extension is required for tray icons to appear. The install script detects GNOME via `gnome-shell --version` and checks for the extension via `gnome-extensions list`, printing a reminder if it is missing.
