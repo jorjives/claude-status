@@ -30,13 +30,45 @@ The install script:
 2. Installs the AppIndicator system library
 3. Sets up a systemd user service that starts automatically on login
 
+## Install from .deb
+
+Download the latest `.deb` from [GitHub Releases](https://github.com/jorjives/claude-status/releases/latest):
+
+```bash
+sudo apt install ./claude-status_*_all.deb
+```
+
+The service starts automatically on your next login. To start it immediately:
+
+```bash
+systemctl --user start claude-status
+```
+
 ## Uninstall
+
+If installed via .deb:
+
+```bash
+sudo apt remove claude-status
+```
+
+If installed via install.sh:
 
 ```bash
 systemctl --user disable --now claude-status
 rm ~/.config/systemd/user/claude-status.service
 systemctl --user daemon-reload
 ```
+
+## Development
+
+After cloning, set up git hooks:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+This runs tests automatically before each push.
 
 ## Running tests
 
