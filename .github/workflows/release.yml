@@ -51,7 +51,7 @@ jobs:
           ln -s ../claude-status.service \
             "$PKG/usr/lib/systemd/user/graphical-session.target.wants/claude-status.service"
 
-          dpkg-deb --build "$PKG"
+          dpkg-deb --root-owner-group --build "$PKG"
 
       - name: Delete existing edge release and tag
         if: steps.version.outputs.prerelease == 'true'
