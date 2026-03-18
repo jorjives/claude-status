@@ -1,0 +1,10 @@
+[Unit]
+Description=Claude Status System Tray Icon
+After=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/share/claude-status/tray.py
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

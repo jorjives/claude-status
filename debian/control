@@ -1,0 +1,9 @@
+Package: claude-status
+Version: VERSION
+Architecture: all
+Maintainer: jorjives
+Depends: python3, python3-pip, gir1.2-ayatanaappindicator3-0.1
+Description: System tray icon showing Claude API status
+ Polls status.claude.com every 60 seconds and displays a colour-coded
+ tray icon: green for operational, orange for minor incidents, red for
+ major/critical incidents or when status is unavailable.

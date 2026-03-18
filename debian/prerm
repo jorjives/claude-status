@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+# Best-effort stop for all logged-in users
+for uid in $(loginctl list-users --no-legend 2>/dev/null | awk '{print $1}'); do
+    systemctl --user -M "$uid@" stop claude-status 2>/dev/null || true
+done
