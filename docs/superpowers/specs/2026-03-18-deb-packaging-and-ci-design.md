@@ -16,6 +16,7 @@ Distribute claude-status as a `.deb` package built automatically by GitHub Actio
 | `tray.py` | `/usr/share/claude-status/tray.py` |
 | `requirements.txt` | `/usr/share/claude-status/requirements.txt` |
 | systemd unit | `/usr/lib/systemd/user/claude-status.service` |
+| symlink | `/usr/lib/systemd/user/graphical-session.target.wants/claude-status.service` |
 
 ### Control file
 
@@ -46,7 +47,7 @@ Restart=on-failure
 WantedBy=graphical-session.target
 ```
 
-Installed to `/usr/lib/systemd/user/` (system-wide user unit), so all users get the service on login without running `systemctl --user enable`.
+Installed to `/usr/lib/systemd/user/` (system-wide user unit), making it available to all users. The .deb also ships a symlink at `/usr/lib/systemd/user/graphical-session.target.wants/claude-status.service` so the service auto-starts on login without each user needing to run `systemctl --user enable`.
 
 ## GitHub Actions Workflow
 
