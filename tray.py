@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import json
+import os
+import tempfile
 import threading
 import time
 import urllib.request
 import webbrowser
-
-import tempfile
 
 import pystray
 from PIL import Image, ImageDraw
@@ -15,22 +15,28 @@ class _Icon(pystray.Icon):
     """pystray saves temp icons without a .png extension; AppIndicator
     won't load them. Override to add the suffix."""
     def _update_fs_icon(self):
+        old = getattr(self, '_icon_path', None)
         self._icon_path = tempfile.mktemp(suffix='.png')
         with open(self._icon_path, 'wb') as f:
             self.icon.save(f, 'PNG')
         self._icon_valid = True
+        if old:
+            try:
+                os.remove(old)
+            except OSError:
+                pass
 
 STATUS_URL = "https://status.claude.com/api/v2/status.json"
 STATUS_PAGE = "https://status.claude.com"
 POLL_INTERVAL = 60
 
+ERROR_COLOR = "#F44336"
 INDICATOR_COLORS = {
     "none": "#4CAF50",
     "minor": "#FF9800",
-    "major": "#F44336",
-    "critical": "#F44336",
+    "major": ERROR_COLOR,
+    "critical": ERROR_COLOR,
 }
-ERROR_COLOR = "#F44336"
 
 
 def _hex_to_rgba(hex_color: str) -> tuple:
@@ -69,13 +75,16 @@ def fetch_status() -> tuple[str, str]:
 
 
 def _poll(icon: pystray.Icon) -> None:
+    prev_color = prev_desc = None
     while True:
         try:
             color, description = fetch_status()
         except Exception:
             color, description = ERROR_COLOR, "Status unavailable"
-        icon.icon = make_image(color)
-        icon.title = description
+        if color != prev_color or description != prev_desc:
+            icon.icon = make_image(color)
+            icon.title = description
+            prev_color, prev_desc = color, description
         time.sleep(POLL_INTERVAL)
 
 
