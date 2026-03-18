@@ -50,4 +50,10 @@ if command -v gnome-shell &>/dev/null; then
     fi
 fi
 
+# Developer setup: enable git hooks
+if [ -d "$SCRIPT_DIR/.git" ]; then
+    git -C "$SCRIPT_DIR" config core.hooksPath .githooks
+    echo "Git hooks enabled."
+fi
+
 echo "Done."

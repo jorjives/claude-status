@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "Running tests before push..."
+PYSTRAY_BACKEND=xorg python3 -m pytest tests/ -v
