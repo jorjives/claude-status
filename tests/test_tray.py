@@ -3,7 +3,7 @@ import os
 os.environ.setdefault("PYSTRAY_BACKEND", "xorg")
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from tray import _hex_to_rgba, make_image, INDICATOR_COLORS, ERROR_COLOR
+from tray import _hex_to_rgba, make_image, INDICATOR_COLORS, ERROR_COLOR, SPARKLE_B64
 
 
 def test_hex_to_rgba_green():
@@ -42,3 +42,9 @@ def test_indicator_critical_is_red():
 
 def test_error_color_is_red():
     assert ERROR_COLOR == "#F44336"
+
+
+def test_sparkle_b64_is_valid_png():
+    import base64
+    data = base64.b64decode(SPARKLE_B64)
+    assert data[:8] == b'\x89PNG\r\n\x1a\n'

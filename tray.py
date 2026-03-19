@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import base64
 import json
 import os
+from io import BytesIO
 import tempfile
 import threading
 import time
@@ -46,23 +48,27 @@ def _hex_to_rgba(hex_color: str) -> tuple:
     return (r, g, b, 255)
 
 
+# Pre-rendered 40x40 white Claude sparkle on transparent background
+SPARKLE_B64 = "iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAEtUlEQVR4nMWYfWhWVRzHv3c9my+1lDlbbxiVZFaI68WIGtI/wnpd1DSCgt4MKoLeGfYGFg16AcWmGUolscxFUYlFRUUqJTVtFWRLy+FsrbnZ2mwzt09/3PO4385z7/Pc59mqHxy49/f9nt/93t8959zfOVICA4qADUAv0AzMS9CnGFgApJI8Y0wGPMxo25GDfxSwzXHf/C8EfkCmXZqFf5XHPbHQZxcl5G2N8N2bhX+Jue6X9GtiRYUYcBpw0MvKEDArhr/O8JqzxK0B6oHa8RC5JOIzr4rh2iHRGMN5EBh2nAHg7LEKLAF+9AQeBKZHcLcbzpII/A4jLm1rkogoJZyxi4EpEfiVEVmsj+DtNXi1h9UAhyPi3JpE4EbToRWYG8F53wvcB1QYPAAGDX68wSqB/ghx+4BpSQRu9zr+Bdzmcc4EDnm85w1eYfztxl8G7IoQdwioyinOBamPCACwGphoeMsiXuQkh51n/BudLwV8FBP7rkTiXKBi4Gmix8hXwEzHKwd6PLzBYTXG95TzPRsj7rXE4jyhVUBbRMA/gBsc5yEPGwROAe40vlrgajJnLMD3wNEFCXQCyoA3Yt58DTAN+MXzLwceNffVQHdE/37Guu4ZobXAbzEZWOn52hg9PgdiXjD3kpKnyHKgMeZhvnXmwN/K8awUMBuYI0lBnkKvkbRSUkUubowNSDorCIKfXbypki6QVClpjqRzJM2WVOL4r+Ql0AWdLqlB0nUFCPxQ0juS5rl2hrInaX0AXCTpfEldkrol9bjWLaknCILhGKHXS1ohKfcfID8bkrRD0meSVgVAp6SMH76xA671KhS9V9I+Se2SjpW0dIyCdkv62rRtQRD0psEAWCTpRUkZxcG/YOnsbJb0uaQtQRB0ZOtw5PsTVi+lrh2jUPBESZPcdZGkyZImuOspkmZKujahuF2SGiW1StovadBgfzpfVxAEBxLGy26ERYNf2YyHHQY6CAvkVCGzuFzSE5IWSyrOo+tLklokzZdUpWRLVUM+wiYQluk9/sILfJIgM0PA7SbeLOAW4GXgp5g+7dk0pQMFwEJgt9e5w/kfML7mHCKHgftinnOCi7ecsHJ6Djgul7hKYEvEg14lLBaqXWYAfgDudtd9rsXZM0Dew8sKSwGPkFk578HtMYAZQJfzDwBzGan7PgXqvL6PAzvN/TognzF8RNzpwBde8GHgBaDUcUo8zj3O/667X084ZlsNp5Nw5n9sfJuAyfkK9JeOnXh7BmCFwd/GfS6ToWXu/govVhNh1b7a+DYTFg2JBa51HQcI9yiTPPxGE3wPUOb8pYyMxzrDb/JELnL+OkYq7W8wu79cAlPAyUDGuQ3hOEsfgfwNXGyw+UbEzcZfAew32O+42ekynB7HrcCpiTMZIa6M0UtNnYffb7DLPOwmL4sbDDYD2Or8TYWKKyIc0Gnb5GeY0RX3uREx3vNELjRYMfAkhW4FGL0R+hI3mz2OPbfJOA90n9rubb4rSExE4KmMrIffEnFE4TjpAT9EzLEvcLnh9Y2XwDLCpaAlKjOOs8BkpjNHvKWEh0trx0VgEgMeMwJbxjN20iPgXNZmrrNWyP+LEf7WXncT6MLxjP0Ppvsebyb0vVQAAAAASUVORK5CYII="
+
+
+def _load_sparkle() -> Image.Image:
+    buf = BytesIO(base64.b64decode(SPARKLE_B64))
+    img = Image.open(buf)
+    img.load()
+    return img.convert("RGBA")
+
+
+_sparkle = _load_sparkle()
+
+
 def make_image(color_hex: str) -> Image.Image:
     size = 64
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    bg = _hex_to_rgba(color_hex)
-    white = (255, 255, 255, 255)
-
-    draw.ellipse([1, 1, size - 2, size - 2], fill=bg)
-
-    cx = size // 2
-    # Outer white A shape
-    draw.polygon([(cx, 10), (10, 54), (54, 54)], fill=white)
-    # Inner hollow (background color triangle)
-    draw.polygon([(cx, 18), (22, 42), (42, 42)], fill=bg)
-    # Crossbar (white rectangle over bottom of hollow)
-    draw.rectangle([18, 38, 46, 44], fill=white)
-
+    draw.ellipse([1, 1, size - 2, size - 2], fill=_hex_to_rgba(color_hex))
+    offset = (size - _sparkle.width) // 2
+    img.paste(_sparkle, (offset, offset), _sparkle)
     return img
 
 
