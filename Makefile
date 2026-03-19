@@ -14,6 +14,8 @@ build:
 	mkdir -p "$(PKG)/DEBIAN"
 	mkdir -p "$(PKG)/usr/share/claude-status"
 	mkdir -p "$(PKG)/usr/lib/systemd/user/graphical-session.target.wants"
+	mkdir -p "$(PKG)/usr/share/applications"
+	mkdir -p "$(PKG)/usr/share/icons/hicolor/scalable/apps"
 	sed 's/^Version: VERSION$$/Version: $(VERSION_LOCAL)/' \
 		debian/control > "$(PKG)/DEBIAN/control"
 	cp debian/postinst "$(PKG)/DEBIAN/postinst"
@@ -23,6 +25,8 @@ build:
 	cp debian/claude-status.service "$(PKG)/usr/lib/systemd/user/claude-status.service"
 	ln -s ../claude-status.service \
 		"$(PKG)/usr/lib/systemd/user/graphical-session.target.wants/claude-status.service"
+	cp claude-status.desktop "$(PKG)/usr/share/applications/claude-status.desktop"
+	cp icons/claude-status.svg "$(PKG)/usr/share/icons/hicolor/scalable/apps/claude-status.svg"
 	dpkg-deb --root-owner-group --build "$(PKG)"
 	@echo "Built $(PKG).deb"
 
