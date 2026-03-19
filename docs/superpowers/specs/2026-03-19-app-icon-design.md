@@ -16,7 +16,7 @@ Replace `make_image()` in `tray.py`. Instead of drawing polygons for an "A", ren
 - Orange (#FF9800) — minor incident
 - Red (#F44336) — major/critical/error
 
-Size remains 64x64. Pillow's `ImageDraw` can draw arbitrary paths via polygon approximation of the SVG path, or use `cairosvg` / manual path parsing. The simplest approach: parse the SVG path `d` attribute into coordinate pairs and draw them as a filled polygon on the Pillow image.
+Size remains 64x64. Approach: pre-render the Claude sparkle SVG to a white-on-transparent PNG at 64x64, embed it as base64 in `tray.py`, and composite it onto the coloured circle at runtime. This avoids SVG path parsing entirely and ensures pixel-perfect rendering. No new dependencies required — Pillow handles PNG decoding and compositing.
 
 ### Static icon
 
@@ -66,11 +66,30 @@ Installed to:
 | `install.sh` | Install .desktop file and icon for dev users |
 | `README.md` | Add icon to the top of the README |
 
+## SVG source
+
+The Claude sparkle SVG path data comes from the user-provided file at `/home/jorjives/Downloads/claude-color.svg`. The path `d` attribute contains the full logo shape. This is used to:
+
+1. Create the static `icons/claude-status.svg` (white sparkle on orange circle)
+2. Pre-render a 64x64 white-on-transparent PNG, base64-encoded and embedded in `tray.py` for the dynamic tray icon
+
+## .deb build additions
+
+The CI workflow and Makefile build steps need to copy these additional files into the package:
+
+- `icons/claude-status.svg` → `$PKG/usr/share/icons/hicolor/scalable/apps/claude-status.svg`
+- `claude-status.desktop` → `$PKG/usr/share/applications/claude-status.desktop`
+
+## install.sh additions
+
+For dev users (not installing via .deb):
+
+- Copy `claude-status.desktop` to `~/.local/share/applications/`
+- Copy `icons/claude-status.svg` to `~/.local/share/icons/hicolor/scalable/apps/`
+
 ## Dependencies
 
-Pillow's `ImageDraw.polygon()` can render the Claude sparkle path if we convert the SVG path data to a list of (x, y) tuples. The SVG path uses cubic bezier curves (`C` commands) and lines (`l`, `L`), which need to be approximated as line segments for Pillow. This can be done with a small path parser function — no new dependencies required.
-
-Alternatively, if the path approximation is too complex or lossy at 64px, we can pre-render the SVG to a 64x64 PNG and embed it as base64 in the source, compositing it onto the coloured circle. This avoids path parsing entirely.
+No new dependencies. Pillow handles PNG decoding and compositing for the tray icon. The static SVG is hand-crafted.
 
 ## What stays the same
 
