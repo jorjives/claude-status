@@ -38,6 +38,15 @@ else
     echo "Service started."
 fi
 
+# Install desktop entry and icon
+DESKTOP_DIR="$HOME/.local/share/applications"
+ICON_DIR="$HOME/.local/share/icons/hicolor/scalable/apps"
+mkdir -p "$DESKTOP_DIR" "$ICON_DIR"
+cp "$SCRIPT_DIR/claude-status.desktop" "$DESKTOP_DIR/claude-status.desktop"
+sed -i "s|Exec=.*|Exec=$PYTHON $TRAY_PY|" "$DESKTOP_DIR/claude-status.desktop"
+cp "$SCRIPT_DIR/icons/claude-status.svg" "$ICON_DIR/claude-status.svg"
+echo "Desktop entry and icon installed."
+
 # GNOME check
 if command -v gnome-shell &>/dev/null; then
     if ! gnome-extensions list 2>/dev/null | grep -qF "appindicatorsupport@rgcjonas.gmail.com"; then

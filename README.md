@@ -1,5 +1,9 @@
 # claude-status
 
+<p align="center">
+  <img src="icons/claude-status.svg" width="96" alt="Claude Status icon">
+</p>
+
 A Linux system tray icon that shows the current Claude API status.
 
 Polls [status.claude.com](https://status.claude.com) every 60 seconds and displays a colour-coded icon:
