@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Claude Status
+Comment=System tray icon showing Claude API status
+Exec=/usr/bin/python3 /usr/share/claude-status/tray.py
+Icon=claude-status
+Terminal=false
+Categories=Utility;
